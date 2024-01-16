@@ -79,13 +79,14 @@
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
 import { ref } from 'vue'
-import axios from 'axios'
 
 import AuthAlerts from '@/components/AuthAlerts.vue'
 
 import { useAuthAlertsStore } from '@/stores/AuthAlertsStore'; 
+import { useAuthStore } from '@/stores/Auth';
 
 const authAlertsStore = useAuthAlertsStore()
+const authStore = useAuthStore()
 const router = useRouter()
 
 const username = ref('')
@@ -121,45 +122,13 @@ async function onSubmit() {
     password: password.value
   }
 
-  await axios
-    .post('https://localhost:44302/api/v1/Account/register', registerData)
-    .then((response) => {
-      if (response.data.succeeded) {
-        console.log(response)
-        const registeredEmail = response.data.data.email
-        username.value = ''
-        email.value = ''
-        password.value = ''
-        confirmPassword.value = ''
-        inProgress.value = false
-        authAlertsStore.addSuccessMessage(`${registeredEmail} successfully registered!`)
-        authAlertsStore.addSuccessMessage('Now you can Login')
-        router.push('/login')
-        return
-      } else if (!response.data.succeeded) {
-        handleBadRequestError(response)
-        inProgress.value = false
-        return
-      }
-    })
-    .catch((error) => {
-      handleBadRequestError(error.response)
-      inProgress.value = false
-      return
-    })
+  const succeeded = await authStore.registerUser(registerData)
+  if (succeeded) {
+    router.push('/login')
+  }
   inProgress.value = false
 }
 
-function handleBadRequestError(response) {
-  const errorsArray = response.data.Errors
-  if (errorsArray.length > 0) {
-    errorsArray.forEach((element) => {
-      authAlertsStore.addErrorMessage(element)
-    })
-  } else if (response.data.Message !== null) {
-    authAlertsStore.addErrorMessage(response.data.Message)
-  }
-}
 </script>
 
 <style scoped>

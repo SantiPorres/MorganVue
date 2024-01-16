@@ -67,28 +67,25 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 
 import AuthAlerts from './../components/AuthAlerts.vue'
 
-import { useAuthAlertsStore } from '@/stores/AuthAlertsStore'; 
+import { useAuthAlertsStore } from '@/stores/AuthAlertsStore';
+import { useAuthStore } from '@/stores/Auth';
+import { useRouter } from 'vue-router';
 
 const authAlertsStore = useAuthAlertsStore()
+const authStore = useAuthStore()
+const router = useRouter()
 
 const email = ref('');
 const password = ref('');
 let inProgress = ref(false)
 
-async function changeInProgress() {
-  inProgress.value = !inProgress.value
-}
-
 document.title = 'Login'
 
 async function onSubmit() {
-  console.log('Hello world')
   inProgress.value = true
-  //await changeInProgress()
   authAlertsStore.cleanMessagesArrays()
   if (!email.value || !password.value) {
     authAlertsStore.addErrorMessage('Both fields must be filled')
@@ -100,39 +97,12 @@ async function onSubmit() {
       'password': password.value
   };
 
-  await axios
-    .post('https://localhost:44302/api/v1/Account/login', loginData)
-    .then((response) => {
-      if (response.data.succeeded) {
-        console.log(response)
-        inProgress.value = false
-        email.value = ''
-        password.value = ''
-        authAlertsStore.addSuccessMessage('Logged')
-        return
-      } else if (!response.data.succeeded) {
-        handleBadRequestError(response)
-        inProgress.value = false
-        return
-      }
-    })
-    .catch((error) => {
-      handleBadRequestError(error.response)
-      inProgress.value = false
-      return
-    })
-  inProgress.value = false
-}
-
-function handleBadRequestError(response) {
-  const errorsArray = response.data.Errors
-  if (errorsArray.length > 0) {
-    errorsArray.forEach((element) => {
-      authAlertsStore.addErrorMessage(element)
-    })
-  } else if (response.data.Message !== null) {
-    authAlertsStore.addErrorMessage(response.data.Message)
+  ;
+  const succeeded = await authStore.loginUser(loginData);
+  if (succeeded) {
+    router.push('/')
   }
+  inProgress.value = false
 }
 
 </script>
