@@ -1,7 +1,3 @@
-<script setup>
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-</script>
-
 <template>
   <v-container id="main-container" fluid class="d-flex align-center justify-center">
     <v-row class="justify-center">
@@ -20,7 +16,7 @@ import { RouterLink, RouterView, useRoute } from 'vue-router'
             </v-col>
           </v-row>
 
-          <v-form @submit.prevent="onSubmit">
+          <v-form @submit.prevent="onSubmit" :readonly="inProgress">
             <v-row>
               <v-col cols="12" class="text-center py-0">
                 <v-text-field
@@ -69,7 +65,7 @@ import { RouterLink, RouterView, useRoute } from 'vue-router'
               </v-col>
               <v-col cols="12" class="text-center pt-1">
                 <p class="text-caption" id="link">
-                  <RouterLink :to="'/login'" @click=""> Do you already have an account? </RouterLink>
+                  <RouterLink :to="'/login'" @click="authAlertsStore.cleanMessagesArrays()"> Do you already have an account? </RouterLink>
                 </p>
               </v-col>
             </v-row>
@@ -80,45 +76,43 @@ import { RouterLink, RouterView, useRoute } from 'vue-router'
   </v-container>
 </template>
 
-<script>
+<script setup>
+import { RouterLink, useRouter } from 'vue-router'
 import { ref } from 'vue'
 import axios from 'axios'
 
 import AuthAlerts from '@/components/AuthAlerts.vue'
 
-// import { useAuthAlertsStore } from '@/stores/AuthAlertsStore'; 
+import { useAuthAlertsStore } from '@/stores/AuthAlertsStore'; 
 
-// const authAlertsStore = useAuthAlertsStore()
+const authAlertsStore = useAuthAlertsStore()
+const router = useRouter()
 
 const username = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 
-let successMessages = ref([])
-let errorMessages = ref([])
-let inProgress = false
+let inProgress = ref(false)
 
 document.title = 'Register'
 
 async function onSubmit() {
-  inProgress = true
-  //authAlertsStore.cleanMessagesArrays()
-  errorMessages.value.length = 0
-  successMessages.value.length = 0
+  inProgress.value = true
+  authAlertsStore.cleanMessagesArrays()
   if (!username.value || !email.value || !password.value || !confirmPassword.value) {
-    errorMessages.value.push('All fields must be filled')
-    inProgress = false
+    authAlertsStore.addErrorMessage('All fields must be filled')
+    inProgress.value = false
     return
   }
   if (password.value.length < 8) {
-    errorMessages.value.push('Password must have at least 8 characters')
-    inProgress = false
+    authAlertsStore.addErrorMessage('Password must have at least 8 characters')
+    inProgress.value = false
     return
   }
   if (password.value !== confirmPassword.value) {
-    errorMessages.value.push('Passwords do not match')
-    inProgress = false
+    authAlertsStore.addErrorMessage('Passwords do not match')
+    inProgress.value = false
     return
   }
   const registerData = {
@@ -137,40 +131,33 @@ async function onSubmit() {
         email.value = ''
         password.value = ''
         confirmPassword.value = ''
-        inProgress = false
-        successMessages.value.push(`${registeredEmail} successfully registered!`)
-        successMessages.value.push('Now you can Login')
+        inProgress.value = false
+        authAlertsStore.addSuccessMessage(`${registeredEmail} successfully registered!`)
+        authAlertsStore.addSuccessMessage('Now you can Login')
+        router.push('/login')
         return
       } else if (!response.data.succeeded) {
         handleBadRequestError(response)
-        inProgress = false
+        inProgress.value = false
         return
       }
     })
     .catch((error) => {
       handleBadRequestError(error.response)
-      inProgress = false
+      inProgress.value = false
       return
     })
-  inProgress = false
-}
-
-function removeError(errorIndex) {
-  errorMessages.value.splice(errorIndex, 1)
-}
-
-function removeMessage(messageIndex) {
-  successMessages.value.splice(messageIndex, 1)
+  inProgress.value = false
 }
 
 function handleBadRequestError(response) {
   const errorsArray = response.data.Errors
   if (errorsArray.length > 0) {
     errorsArray.forEach((element) => {
-      errorMessages.value.push(element)
+      authAlertsStore.addErrorMessage(element)
     })
-  } else {
-    errorMessages.value.push(response.data.Message)
+  } else if (response.data.Message !== null) {
+    authAlertsStore.addErrorMessage(response.data.Message)
   }
 }
 </script>
@@ -199,17 +186,4 @@ function handleBadRequestError(response) {
   color: var(--primary-grey);
 }
 
-#error-alert {
-  align-items: center;
-  background-color: rgba(255, 34, 34, 0.822);
-  padding: 6px;
-  margin: 2px;
-}
-
-#success-alert {
-  align-items: center;
-  background-color: rgba(72, 212, 30, 0.822);
-  padding: 6px;
-  margin: 2px;
-}
 </style>
