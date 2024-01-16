@@ -16,7 +16,7 @@
             </v-col>
           </v-row>
 
-          <v-form @submit.prevent="onSubmit">
+          <v-form @submit.prevent="onSubmit" :readonly="inProgress">
             <!-- INPUTS -->
             <v-row>
               <v-col cols="12" class="text-center py-0">
@@ -35,7 +35,7 @@
             <!-- PROGRESS BARS AND ALERTS -->
             <v-row>
               <!-- PROGRESS BAR -->
-              <v-col cols="12" v-if="inProgress">
+              <v-col cols="12" v-show="inProgress">
                 <v-progress-linear indeterminate color="#EA9215"></v-progress-linear>
               </v-col>
               
@@ -77,19 +77,22 @@ const authAlertsStore = useAuthAlertsStore()
 
 const email = ref('');
 const password = ref('');
-let successMessages = ref([]);
-let errorMessages = ref([]);
-// let showPassword = ref(false);
-let inProgress = false
+let inProgress = ref(false)
+
+async function changeInProgress() {
+  inProgress.value = !inProgress.value
+}
 
 document.title = 'Login'
 
 async function onSubmit() {
-  inProgress = true;
+  console.log('Hello world')
+  inProgress.value = true
+  //await changeInProgress()
   authAlertsStore.cleanMessagesArrays()
   if (!email.value || !password.value) {
     authAlertsStore.addErrorMessage('Both fields must be filled')
-    inProgress = false;
+    inProgress.value = false;
     return;
   }
   const loginData = {
@@ -102,33 +105,33 @@ async function onSubmit() {
     .then((response) => {
       if (response.data.succeeded) {
         console.log(response)
-        inProgress = false
+        inProgress.value = false
         email.value = ''
         password.value = ''
         authAlertsStore.addSuccessMessage('Logged')
         return
       } else if (!response.data.succeeded) {
         handleBadRequestError(response)
-        inProgress = false
+        inProgress.value = false
         return
       }
     })
     .catch((error) => {
       handleBadRequestError(error.response)
-      inProgress = false
+      inProgress.value = false
       return
     })
-  inProgress = false
+  inProgress.value = false
 }
 
 function handleBadRequestError(response) {
   const errorsArray = response.data.Errors
   if (errorsArray.length > 0) {
     errorsArray.forEach((element) => {
-      errorMessages.value.push(element)
+      authAlertsStore.addErrorMessage(element)
     })
   } else if (response.data.Message !== null) {
-    errorMessages.value.push(response.data.Message)
+    authAlertsStore.addErrorMessage(response.data.Message)
   }
 }
 

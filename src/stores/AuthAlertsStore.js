@@ -2,8 +2,8 @@ import { defineStore } from 'pinia'
 
 export const useAuthAlertsStore = defineStore('authAlertsStore', {
   state: () => ({
-    errorMessages: ['hello error message'],
-    successMessages: ['bye success message']
+    errorMessages: [],
+    successMessages: []
   }),
   actions: {
     addErrorMessage(message) {
