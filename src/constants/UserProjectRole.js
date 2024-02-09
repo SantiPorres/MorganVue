@@ -1,3 +1,3 @@
-export const projectOwner = 0
-export const projectAdmin = 1
-export const projectGuest = 2
+export const PROJECT_OWNER = 0
+export const PROJECT_ADMIN = 1
+export const PROJECT_GUEST = 2

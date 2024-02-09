@@ -19,7 +19,7 @@
               <v-col cols="12" class="py-2">
                 <small>*indicates required field</small>
                 <v-text-field
-                  v-model="name"
+                  v-model="newProjectData.name"
                   label="Name*"
                   hint="How will you name this project?"
                   required
@@ -28,7 +28,7 @@
               </v-col>
               <v-col cols="12" class="">
                 <v-textarea
-                  v-model="description"
+                  v-model="newProjectData.description"
                   label="Description"
                   hint="How would you describe this project?"
                   :readonly="loadingStore.inProgress"
@@ -38,7 +38,7 @@
             <Loading />
             <v-row>
               <v-col cols="12" class="py-1">
-                <v-btn block variant="tonal" @click="createProject"> CREATE </v-btn>
+                <v-btn block variant="tonal" @click="onSubmit"> CREATE </v-btn>
               </v-col>
               <v-col cols="12" class="py-1">
                 <v-btn block variant="outlined" @click="discardData"> DISCARD </v-btn>
@@ -51,52 +51,34 @@
   </v-row>
 </template>
 <script setup>
-import axios from 'axios'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 
 import Loading from './Loading.vue'
 
-import { useAuthStore } from '@/stores/Auth'
-import { useLoadingStore } from '@/stores/Loading'
+import { useLoadingStore } from '@/stores/LoadingStore'
+import { useProjectsStore } from '@/stores/ProjectsStore'
 
-const authStore = useAuthStore()
 const loadingStore = useLoadingStore()
+const projectsStore = useProjectsStore()
 
 const dialog = ref(false)
-const name = ref('')
-const description = ref('')
-
-const requestHeaders = {
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${authStore.token}`
-}
+const newProjectData = reactive({
+  name: null,
+  description: null
+})
 
 function discardData() {
-  name.value = ''
-  description.value = ''
+  newProjectData.name = null;
+  newProjectData.description = null;
   dialog.value = false
 }
 
-async function createProject() {
-  loadingStore.startLoading()
-  const projectData = {
-    name: name.value,
-    description: description.value
-  }
-
-  await axios
-    .post('https://localhost:44302/api/v1/Project/add', projectData, {
-      headers: requestHeaders
-    })
-    .then((response) => {
-      console.log(response)
-    })
-    .catch((error) => {
-      console.log(error)
-      loadingStore.stopLoading()
-    })
-  loadingStore.stopLoading()
-  dialog.value = false
+async function onSubmit() {
+  if (newProjectData.description.trim().length === 0) {
+    newProjectData.description = null
+  } 
+  await projectsStore.createProject(newProjectData)
+  discardData()
 }
 </script>
 

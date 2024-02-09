@@ -71,7 +71,7 @@ import { ref } from 'vue'
 import AuthAlerts from './../components/AuthAlerts.vue'
 
 import { useAuthAlertsStore } from '@/stores/AuthAlertsStore';
-import { useAuthStore } from '@/stores/Auth';
+import { useAuthStore } from '@/stores/AuthStore';
 import { useRouter } from 'vue-router';
 
 const authAlertsStore = useAuthAlertsStore()

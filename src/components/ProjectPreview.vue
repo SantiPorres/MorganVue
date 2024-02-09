@@ -26,9 +26,9 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '@/stores/Auth'
+import { useAuthStore } from '@/stores/AuthStore'
 import { ref, onMounted } from 'vue'
-import { projectOwner } from './../constants/UserProjectRole'
+import { PROJECT_OWNER } from './../constants/UserProjectRole'
 
 const authStore = useAuthStore()
 const user = JSON.parse(authStore.user)
@@ -50,8 +50,8 @@ const props = defineProps({
 })
 
 function verifyOwnership() {
-  props.projectUsers.forEach((relation) => {
-    if (user.id === relation.userId && relation.role === projectOwner) {
+  props.projectUsers.map(relation => {
+    if (user.id === relation.userId && relation.role === PROJECT_OWNER) {
       isOwner.value = true
     }
   })

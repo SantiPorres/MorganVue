@@ -6,7 +6,7 @@
 
 <script setup>
 
-import { useLoadingStore } from '@/stores/Loading';
+import { useLoadingStore } from '@/stores/LoadingStore';
 const loadingStore = useLoadingStore()
 
 </script>

@@ -10,7 +10,8 @@
         <Loading/>
         <v-container id="cards-container" class="py-0 px-0">
             <ProjectPreview
-                v-for="project in userProjects"
+                v-for="project in projectsStore.userProjects"
+                :key="project.id"
                 :name="project.name"
                 :description="project.description"
                 :projectUsers="project.projectUsers"
@@ -31,49 +32,31 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onBeforeMount, onMounted } from 'vue'
 
 import Navbar from '@/components/Navbar.vue';
 import ProjectPreview from '@/components/ProjectPreview.vue';
 import CreateProject from '@/components/CreateProject.vue';
 import Loading from '@/components/Loading.vue';
 
-import axios from 'axios';
-
-import { useAuthStore } from '@/stores/Auth';
-import { useLoadingStore } from '@/stores/Loading'
+import { useAuthStore } from '@/stores/AuthStore';
+import { useLoadingStore } from '@/stores/LoadingStore'
+import { useProjectsStore } from '@/stores/ProjectsStore';
 
 const authStore = useAuthStore()
 authStore.$reset()
 
 const loadingStore = useLoadingStore()
+const projectsStore = useProjectsStore()
 
-let userProjects = ref([])
 const user = JSON.parse(authStore.user)
 
+onBeforeMount(async () => {
+    //await projectsStore.getUserProjects()
+})
 
-const requestHeaders = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${authStore.token}`
-}
-
-async function getUserProjects() {
-    loadingStore.startLoading()
-    await axios.get("https://localhost:44302/api/v1/Project/userProjects", {
-        headers: requestHeaders
-    })
-    .then((response) => {
-        userProjects.value = response.data.data
-    })
-    .catch(error => {
-        console.log(error)
-        loadingStore.stopLoading()
-    })
-    loadingStore.stopLoading()
-}
-
-onMounted(() => {
-    getUserProjects()
+onMounted(async () => {
+    await projectsStore.getUserProjects()
 })
 </script>
 

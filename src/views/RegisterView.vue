@@ -83,7 +83,7 @@ import { ref } from 'vue'
 import AuthAlerts from '@/components/AuthAlerts.vue'
 
 import { useAuthAlertsStore } from '@/stores/AuthAlertsStore'; 
-import { useAuthStore } from '@/stores/Auth';
+import { useAuthStore } from '@/stores/AuthStore';
 
 const authAlertsStore = useAuthAlertsStore()
 const authStore = useAuthStore()
