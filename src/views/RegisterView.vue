@@ -16,21 +16,21 @@
             </v-col>
           </v-row>
 
-          <v-form @submit.prevent="onSubmit" :readonly="inProgress">
+          <v-form @submit.prevent="onSubmit" :readonly="loadingStore.inProgress">
             <v-row>
               <v-col cols="12" class="text-center py-0">
                 <v-text-field
-                  v-model="username"
+                  v-model="registerData.username"
                   label="Username"
                   variant="underlined"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" class="text-center py-0">
-                <v-text-field v-model="email" label="Email" variant="underlined"></v-text-field>
+                <v-text-field v-model="registerData.email" label="Email" variant="underlined"></v-text-field>
               </v-col>
               <v-col cols="12" class="text-center py-0">
                 <v-text-field
-                  v-model="password"
+                  v-model="registerData.password"
                   label="Password"
                   variant="underlined"
                   hint="At least 8 characters"
@@ -50,9 +50,7 @@
             <!-- PROGRESS BARS AND ALERTS -->
             <v-row>
               <!-- PROGRESS BAR -->
-              <v-col cols="12" v-if="inProgress">
-                <v-progress-linear indeterminate color="#EA9215"></v-progress-linear>
-              </v-col>
+              <Loading/>
               
               <!-- ALERTS -->
               <AuthAlerts/>
@@ -78,55 +76,58 @@
 
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 
 import AuthAlerts from '@/components/AuthAlerts.vue'
+import Loading from '@/components/Loading.vue'
 
 import { useAuthAlertsStore } from '@/stores/AuthAlertsStore'; 
 import { useAuthStore } from '@/stores/AuthStore';
+import { useLoadingStore } from '@/stores/LoadingStore';
 
 const authAlertsStore = useAuthAlertsStore()
 const authStore = useAuthStore()
+const loadingStore = useLoadingStore()
 const router = useRouter()
 
-const username = ref('')
-const email = ref('')
-const password = ref('')
+const registerData = reactive({
+  username: null,
+  email: null,
+  password: null
+})
 const confirmPassword = ref('')
-
-let inProgress = ref(false)
 
 document.title = 'Register'
 
 async function onSubmit() {
-  inProgress.value = true
-  authAlertsStore.cleanMessagesArrays()
-  if (!username.value || !email.value || !password.value || !confirmPassword.value) {
-    authAlertsStore.addErrorMessage('All fields must be filled')
-    inProgress.value = false
-    return
+  try {
+    loadingStore.startLoading()
+    authAlertsStore.cleanMessagesArrays()
+    if (
+      !registerData.username 
+      || !registerData.email
+      || !registerData.password 
+      || !confirmPassword.value
+    ) {
+      authAlertsStore.addErrorMessage('All fields must be filled')
+      return
+    }
+    if (registerData.password.length < 8) {
+      authAlertsStore.addErrorMessage('Password must have at least 8 characters')
+      return
+    }
+    if (registerData.password !== confirmPassword.value) {
+      authAlertsStore.addErrorMessage('Passwords do not match')
+      return
+    }  
+    const succeeded = await authStore.registerUser(registerData)
+    if (succeeded) {
+      router.push('/login')
+    }
   }
-  if (password.value.length < 8) {
-    authAlertsStore.addErrorMessage('Password must have at least 8 characters')
-    inProgress.value = false
-    return
+  finally {
+    loadingStore.stopLoading()
   }
-  if (password.value !== confirmPassword.value) {
-    authAlertsStore.addErrorMessage('Passwords do not match')
-    inProgress.value = false
-    return
-  }
-  const registerData = {
-    username: username.value,
-    email: email.value,
-    password: password.value
-  }
-
-  const succeeded = await authStore.registerUser(registerData)
-  if (succeeded) {
-    router.push('/login')
-  }
-  inProgress.value = false
 }
 
 </script>

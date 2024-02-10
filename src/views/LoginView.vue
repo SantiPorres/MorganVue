@@ -16,18 +16,18 @@
             </v-col>
           </v-row>
 
-          <v-form @submit.prevent="onSubmit" :readonly="inProgress">
+          <v-form @submit.prevent="onSubmit" :readonly="loadingStore.inProgress">
             <!-- INPUTS -->
             <v-row>
               <v-col cols="12" class="text-center py-0">
-                <v-text-field label="Email" variant="underlined" v-model="email"></v-text-field>
+                <v-text-field label="Email" variant="underlined" v-model="loginData.email"></v-text-field>
               </v-col>
               <v-col cols="12" class="text-center py-0">
                 <v-text-field
                   :type="'password'"
                   label="Password"
                   variant="underlined"
-                  v-model="password"
+                  v-model="loginData.password"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -35,9 +35,7 @@
             <!-- PROGRESS BARS AND ALERTS -->
             <v-row>
               <!-- PROGRESS BAR -->
-              <v-col cols="12" v-show="inProgress">
-                <v-progress-linear indeterminate color="#EA9215"></v-progress-linear>
-              </v-col>
+              <Loading/>
               
               <!-- ALERTS -->
               <AuthAlerts/>
@@ -66,43 +64,43 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-
 import AuthAlerts from './../components/AuthAlerts.vue'
+import Loading from './../components/Loading.vue'
 
 import { useAuthAlertsStore } from '@/stores/AuthAlertsStore';
 import { useAuthStore } from '@/stores/AuthStore';
 import { useRouter } from 'vue-router';
+import { useLoadingStore } from '@/stores/LoadingStore';
+import { reactive } from 'vue';
 
 const authAlertsStore = useAuthAlertsStore()
 const authStore = useAuthStore()
+const loadingStore = useLoadingStore()
 const router = useRouter()
 
-const email = ref('');
-const password = ref('');
-let inProgress = ref(false)
+const loginData = reactive({
+  email: null,
+  password: null
+})
 
 document.title = 'Login'
 
 async function onSubmit() {
-  inProgress.value = true
-  authAlertsStore.cleanMessagesArrays()
-  if (!email.value || !password.value) {
-    authAlertsStore.addErrorMessage('Both fields must be filled')
-    inProgress.value = false;
-    return;
+  try {
+    loadingStore.startLoading();
+    authAlertsStore.cleanMessagesArrays()
+    if (!loginData.email || !loginData.password) {
+      authAlertsStore.addErrorMessage('Both fields must be filled')
+      return;
+    }
+    const succeeded = await authStore.loginUser(loginData);
+    if (succeeded) {
+      router.push('/')
+    }
   }
-  const loginData = {
-      'email': email.value,
-      'password': password.value
-  };
-
-  ;
-  const succeeded = await authStore.loginUser(loginData);
-  if (succeeded) {
-    router.push('/')
+  finally {
+    loadingStore.stopLoading();
   }
-  inProgress.value = false
 }
 
 </script>

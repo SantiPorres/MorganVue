@@ -9,11 +9,11 @@ import {
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        token: localStorage.getItem("token") || null,
-        user: localStorage.getItem("user") || null,
+        token: sessionStorage.getItem("token") || null,
+        user: sessionStorage.getItem("user") || null,
         baseRequestHeaders : {
             'content-type': HEADERS_CONTENT_TYPE_VALUE,
-            'authorization': HEADERS_AUTHORIZATION_VALUE(localStorage.getItem("token"))
+            'authorization': HEADERS_AUTHORIZATION_VALUE(sessionStorage.getItem("token"))
         }
     }),
     actions: {
@@ -21,10 +21,8 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const response = await axios.post(BASE_URL + AUTH_LOGIN_URL, loginData)
                 if (response.data.succeeded) {
-                    localStorage.setItem("token", response.data.token)
-                    localStorage.setItem("user", JSON.stringify(response.data.user))
-                    // this.token = response.data.token
-                    // this.user = response.data.user
+                    sessionStorage.setItem("token", response.data.token)
+                    sessionStorage.setItem("user", JSON.stringify(response.data.user))
                     return true;
                 } else {
                     this.handleErrors(response.data)
@@ -60,6 +58,14 @@ export const useAuthStore = defineStore('auth', {
             } else if (data.Message !== null) {
                 authAlertsStore.addErrorMessage(data.Message)
             }
+        }
+    },
+    getters: {
+        isLoggedIn() {
+            if (this.token && this.user) {
+                return true;
+            }
+            return false;
         }
     }
 })

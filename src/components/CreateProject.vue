@@ -74,7 +74,7 @@ function discardData() {
 }
 
 async function onSubmit() {
-  if (newProjectData.description.trim().length === 0) {
+  if (newProjectData.description?.trim().length === 0) {
     newProjectData.description = null
   } 
   await projectsStore.createProject(newProjectData)

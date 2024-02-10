@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, onMounted } from 'vue'
+import { onMounted } from 'vue'
 
 import Navbar from '@/components/Navbar.vue';
 import ProjectPreview from '@/components/ProjectPreview.vue';
@@ -50,10 +50,6 @@ const loadingStore = useLoadingStore()
 const projectsStore = useProjectsStore()
 
 const user = JSON.parse(authStore.user)
-
-onBeforeMount(async () => {
-    //await projectsStore.getUserProjects()
-})
 
 onMounted(async () => {
     await projectsStore.getUserProjects()
