@@ -28,7 +28,7 @@
 <script setup>
 import { useAuthStore } from '@/stores/AuthStore'
 import { ref, onMounted } from 'vue'
-import { PROJECT_OWNER } from './../constants/UserProjectRole'
+import { PROJECT_OWNER } from '../constants/userProjectRoles'
 
 const authStore = useAuthStore()
 const user = JSON.parse(authStore.user)
@@ -84,4 +84,4 @@ onMounted(() => {
   background-color: var(--secondary-grey);
   color: var(--primary-grey);
 }
-</style>
+</style>../constants/userProjectRoles

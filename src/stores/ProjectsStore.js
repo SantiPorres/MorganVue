@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ADD_PROJECT_URL, BASE_URL, GET_USER_PROJECTS_URL } from "@/api_paths";
+import { ADD_PROJECT_URL, BASE_URL, GET_USER_PROJECTS_URL } from "@/constants/apiPaths";
 import { useAuthStore } from "./AuthStore";
 import { defineStore } from "pinia";
 import { useLoadingStore } from "./LoadingStore";
