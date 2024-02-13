@@ -1,6 +1,6 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="dialog" width="1024">
+    <v-dialog v-model="dialog" max-width="550px" @click:outside="discardData">
       <template v-slot:activator="{ props }">
         <v-btn id="create-btn" variant="tonal" block v-bind="props">
           <span class="material-symbols-outlined"> construction </span>
@@ -17,10 +17,10 @@
           <v-container>
             <v-row>
               <v-col cols="12" class="py-2">
-                <small>*indicates required field</small>
+                <small>* indicates required field</small>
                 <v-text-field
                   v-model="newProjectData.name"
-                  label="Name*"
+                  label="Name *"
                   hint="How will you name this project?"
                   required
                   :readonly="loadingStore.inProgress"
@@ -38,7 +38,7 @@
             <Loading />
             <v-row>
               <v-col cols="12" class="py-1">
-                <v-btn block variant="tonal" @click="onSubmit"> CREATE </v-btn>
+                <v-btn id="create-btn" block variant="tonal" @click="onSubmit"> CREATE </v-btn>
               </v-col>
               <v-col cols="12" class="py-1">
                 <v-btn block variant="outlined" @click="discardData"> DISCARD </v-btn>
@@ -89,6 +89,10 @@ async function onSubmit() {
   background-color: var(--primary-orange);
   color: var(--primary-dark);
   font-weight: bold;
+}
+
+#create-btn:hover {
+  box-shadow: 0px 0px 15px 0px rgba(46,46,46,1);
 }
 
 #dialog-card {
