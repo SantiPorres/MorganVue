@@ -12,6 +12,7 @@
             <ProjectPreview
                 v-for="project in projectsStore.userProjects"
                 :key="project.id"
+                :id="project.id"
                 :name="project.name"
                 :description="project.description"
                 :projectUsers="project.projectUsers"
@@ -33,6 +34,7 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { RouterLink } from 'vue-router';
 
 import Navbar from '@/components/Navbar.vue';
 import ProjectPreview from '@/components/ProjectPreview.vue';

@@ -10,7 +10,7 @@ import {
     INTERNAL_SERVER_ERROR_MESSAGE, 
     SUCCESSFULLY_REGISTERED_EMAIL, 
     SUCCESSFULLY_REGISTERED_USER
-} from '@/constants/messages'
+} from '@/constants/messages';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -25,8 +25,8 @@ export const useAuthStore = defineStore('auth', {
         async loginUser(loginData) {
             try {
                 const response = await axios.post(BASE_URL + AUTH_LOGIN_URL, loginData);
-                sessionStorage.setItem("token", response.data.token)
-                sessionStorage.setItem("user", JSON.stringify(response.data.user))
+                sessionStorage.setItem("token", response.data.token);
+                sessionStorage.setItem("user", JSON.stringify(response.data.user));
                 return true;
             } catch (error) {
                 this.handleErrors(error)

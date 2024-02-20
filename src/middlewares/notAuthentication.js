@@ -1,11 +1,11 @@
 import { useAuthStore } from "@/stores/AuthStore";
 
-export default function notAuthenticated({ next, store }) {
+export default function notAuthenticated({ next }) {
     const authStore = useAuthStore()
-    if (authStore.isLoggedIn) {
-        return next({
-            name: 'dashboard'
-        })
+    if (!authStore.isLoggedIn) {
+        return next()
     }
-    return next();
+    return next({
+        name: 'dashboard'
+    });
 }

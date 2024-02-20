@@ -1,7 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import DashBoardView from '../views/DashBoardView.vue'
+import ProjectView from '../views/ProjectView.vue'
+
 import middlewarePipeline from '@/middlewares/middlewarePipeline'
 import authenticated from '@/middlewares/authentication'
 import notAuthenticated from '@/middlewares/notAuthentication'
@@ -11,33 +14,44 @@ const router = createRouter({
   routes: [
     {
       path: '/login',
-        name: 'login',
-        meta: {
-          middleware: [
-            notAuthenticated
-          ]
-        },
-        component: LoginView
+      name: 'login',
+      meta: {
+        middleware: [
+          notAuthenticated
+        ]
+      },
+      component: LoginView
     },
     {
       path: '/register',
-        name: 'register',
-        meta: {
-          middleware: [
-            notAuthenticated
-          ]
-        },
-        component: RegisterView
+      name: 'register',
+      meta: {
+        middleware: [
+          notAuthenticated
+        ]
+      },
+      component: RegisterView
     },
     {
-      path: '/',
-        name: 'dashboard',
-        meta: {
-          middleware: [
-            authenticated
-          ]
-        },
-        component: DashBoardView
+      path: '/home',
+      name: 'dashboard',
+      meta: {
+        middleware: [
+          authenticated
+        ]
+      },
+      component: DashBoardView,
+      alias: [
+        '/'
+      ]
+    },
+    {
+      path: '/projects/:projectId',
+      name: 'projectDetails',
+      meta: {
+        
+      },
+      component: ProjectView
     }
   ]
 })

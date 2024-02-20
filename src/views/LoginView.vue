@@ -64,14 +64,15 @@
 </template>
 
 <script setup>
+import { reactive } from 'vue';
+import { RouterLink, useRouter } from 'vue-router'
+
 import AuthAlerts from './../components/AuthAlerts.vue'
 import Loading from './../components/Loading.vue'
 
 import { useAuthAlertsStore } from '@/stores/AuthAlertsStore';
 import { useAuthStore } from '@/stores/AuthStore';
-import { useRouter } from 'vue-router';
 import { useLoadingStore } from '@/stores/LoadingStore';
-import { reactive } from 'vue';
 
 const authAlertsStore = useAuthAlertsStore()
 const authStore = useAuthStore()
@@ -95,7 +96,10 @@ async function onSubmit() {
     }
     const succeeded = await authStore.loginUser(loginData);
     if (succeeded) {
-      router.push('/')
+      authStore.$reset()
+      router.push({
+        name: 'dashboard'
+      })
     }
   }
   finally {
