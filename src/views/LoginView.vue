@@ -16,18 +16,18 @@
             </v-col>
           </v-row>
 
-          <v-form @submit.prevent="onSubmit" :readonly="inProgress">
+          <v-form @submit.prevent="onSubmit" :readonly="loadingStore.inProgress">
             <!-- INPUTS -->
             <v-row>
               <v-col cols="12" class="text-center py-0">
-                <v-text-field label="Email" variant="underlined" v-model="email"></v-text-field>
+                <v-text-field label="Email" variant="underlined" v-model="loginData.email"></v-text-field>
               </v-col>
               <v-col cols="12" class="text-center py-0">
                 <v-text-field
                   :type="'password'"
                   label="Password"
                   variant="underlined"
-                  v-model="password"
+                  v-model="loginData.password"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -35,9 +35,7 @@
             <!-- PROGRESS BARS AND ALERTS -->
             <v-row>
               <!-- PROGRESS BAR -->
-              <v-col cols="12" v-show="inProgress">
-                <v-progress-linear indeterminate color="#EA9215"></v-progress-linear>
-              </v-col>
+              <Loading/>
               
               <!-- ALERTS -->
               <AuthAlerts/>
@@ -66,72 +64,46 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import axios from 'axios'
+import { reactive } from 'vue';
+import { RouterLink, useRouter } from 'vue-router'
 
 import AuthAlerts from './../components/AuthAlerts.vue'
+import Loading from './../components/Loading.vue'
 
-import { useAuthAlertsStore } from '@/stores/AuthAlertsStore'; 
+import { useAuthAlertsStore } from '@/stores/AuthAlertsStore';
+import { useAuthStore } from '@/stores/AuthStore';
+import { useLoadingStore } from '@/stores/LoadingStore';
 
 const authAlertsStore = useAuthAlertsStore()
+const authStore = useAuthStore()
+const loadingStore = useLoadingStore()
+const router = useRouter()
 
-const email = ref('');
-const password = ref('');
-let inProgress = ref(false)
-
-async function changeInProgress() {
-  inProgress.value = !inProgress.value
-}
+const loginData = reactive({
+  email: null,
+  password: null
+})
 
 document.title = 'Login'
 
 async function onSubmit() {
-  console.log('Hello world')
-  inProgress.value = true
-  //await changeInProgress()
-  authAlertsStore.cleanMessagesArrays()
-  if (!email.value || !password.value) {
-    authAlertsStore.addErrorMessage('Both fields must be filled')
-    inProgress.value = false;
-    return;
+  try {
+    loadingStore.startLoading();
+    authAlertsStore.cleanMessagesArrays()
+    if (!loginData.email || !loginData.password) {
+      authAlertsStore.addErrorMessage('Both fields must be filled')
+      return;
+    }
+    const succeeded = await authStore.loginUser(loginData);
+    if (succeeded) {
+      authStore.$reset()
+      router.push({
+        name: 'dashboard'
+      })
+    }
   }
-  const loginData = {
-      'email': email.value,
-      'password': password.value
-  };
-
-  await axios
-    .post('https://localhost:44302/api/v1/Account/login', loginData)
-    .then((response) => {
-      if (response.data.succeeded) {
-        console.log(response)
-        inProgress.value = false
-        email.value = ''
-        password.value = ''
-        authAlertsStore.addSuccessMessage('Logged')
-        return
-      } else if (!response.data.succeeded) {
-        handleBadRequestError(response)
-        inProgress.value = false
-        return
-      }
-    })
-    .catch((error) => {
-      handleBadRequestError(error.response)
-      inProgress.value = false
-      return
-    })
-  inProgress.value = false
-}
-
-function handleBadRequestError(response) {
-  const errorsArray = response.data.Errors
-  if (errorsArray.length > 0) {
-    errorsArray.forEach((element) => {
-      authAlertsStore.addErrorMessage(element)
-    })
-  } else if (response.data.Message !== null) {
-    authAlertsStore.addErrorMessage(response.data.Message)
+  finally {
+    loadingStore.stopLoading();
   }
 }
 
