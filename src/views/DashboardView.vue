@@ -34,7 +34,6 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { RouterLink } from 'vue-router';
 
 import Navbar from '@/components/Navbar.vue';
 import ProjectPreview from '@/components/ProjectPreview.vue';
@@ -43,13 +42,13 @@ import Loading from '@/components/Loading.vue';
 
 import { useAuthStore } from '@/stores/AuthStore';
 import { useLoadingStore } from '@/stores/LoadingStore'
-import { useProjectsStore } from '@/stores/ProjectsStore';
+import { useProjectStore } from '@/stores/ProjectStore';
 
 const authStore = useAuthStore()
 authStore.$reset()
 
 const loadingStore = useLoadingStore()
-const projectsStore = useProjectsStore()
+const projectsStore = useProjectStore()
 
 const user = JSON.parse(authStore.user)
 

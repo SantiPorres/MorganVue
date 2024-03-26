@@ -1,12 +1,13 @@
 import axios from "axios";
-import { ADD_PROJECT_URL, BASE_URL, GET_USER_PROJECTS_URL } from "@/constants/apiPaths";
+import { ADD_PROJECT_URL, BASE_URL, GET_USER_PROJECTS_URL, GET_PROJECT_BY_ID } from "@/constants/apiPaths";
 import { useAuthStore } from "./AuthStore";
 import { defineStore } from "pinia";
 import { useLoadingStore } from "./LoadingStore";
 
-export const useProjectsStore = defineStore('projects', {
+export const useProjectStore = defineStore('project', {
     state: () => ({
-        userProjects: []
+        userProjects: [],
+        project: null
     }),
     actions: {
         async getUserProjects() {
@@ -52,6 +53,27 @@ export const useProjectsStore = defineStore('projects', {
             }
             catch(error) {
                 console.log(error)
+            }
+            finally {
+                const loadingStore = useLoadingStore()
+                loadingStore.stopLoading();
+            }
+        },
+        async getProjectById(projectId) {
+            try {
+                const loadingStore = useLoadingStore()
+                loadingStore.startLoading()
+
+                const authStore = useAuthStore();
+                const response = await axios
+                    .get(BASE_URL + GET_PROJECT_BY_ID(projectId), {
+                        headers: authStore.baseRequestHeaders
+                    })
+
+                this.project = response.data.data;
+            }
+            catch(error) {
+                console.log(error);
             }
             finally {
                 const loadingStore = useLoadingStore()

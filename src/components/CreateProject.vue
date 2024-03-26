@@ -56,10 +56,10 @@ import { reactive, ref } from 'vue'
 import Loading from './Loading.vue'
 
 import { useLoadingStore } from '@/stores/LoadingStore'
-import { useProjectsStore } from '@/stores/ProjectsStore'
+import { useProjectStore } from '@/stores/ProjectStore'
 
 const loadingStore = useLoadingStore()
-const projectsStore = useProjectsStore()
+const projectsStore = useProjectStore()
 
 const dialog = ref(false)
 const newProjectData = reactive({

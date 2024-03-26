@@ -12,4 +12,5 @@ export const GET_SEVERAL_USERS_BY_IDS_URL = 'user/several';
 
 // Project
 export const GET_USER_PROJECTS_URL = 'project/userprojects';
+export const GET_PROJECT_BY_ID = (projectId) => `project/${projectId}`;
 export const ADD_PROJECT_URL = 'project/add';
